@@ -2187,27 +2187,43 @@ function ve(t, l) {
   const gradient = customization == null ? void 0 : customization.gradient;
   const avatars = customization == null ? void 0 : customization.avatars;
   const logo = customization == null ? void 0 : customization.logo;
+  if (customization) {
+    console.log("[UplinqChatWidget] Customization received:", customization);
+  }
   if (gradient && chatScroll) {
     const { color1, color2, color3, color4 } = gradient;
-    chatScroll.style.background = `linear-gradient(180deg, ${color1}, ${color2}, ${color3} 32%, ${color4} 55%, #fff 72%, #fff, #fff)`;
+    if (color1 && color2 && color3 && color4) {
+      const gradientValue = `linear-gradient(180deg, ${color1}, ${color2}, ${color3} 32%, ${color4} 55%, #fff 72%, #fff, #fff)`;
+      chatScroll.style.setProperty("background", gradientValue, "important");
+      console.log("[UplinqChatWidget] Gradient applied:", gradientValue);
+    } else {
+      console.warn("[UplinqChatWidget] Gradient colors incomplete:", { color1, color2, color3, color4 });
+    }
   }
-  if (avatars && Array.isArray(avatars) && P) {
+  if (avatars && Array.isArray(avatars) && avatars.length > 0 && P) {
     P.innerHTML = "";
     avatars.slice(0, 3).forEach((url) => {
-      const img = document.createElement("img");
-      img.src = url;
-      img.alt = "Agent";
-      P.appendChild(img);
+      if (url && typeof url === "string") {
+        const img = document.createElement("img");
+        img.src = url;
+        img.alt = "Agent";
+        P.appendChild(img);
+      }
     });
+    console.log("[UplinqChatWidget] Avatars updated:", avatars.slice(0, 3));
   }
   if (G) {
     const logoImg = G.querySelector("img");
     if (logo !== void 0) {
-      if (logo) {
-        logoImg.src = logo;
-        G.style.display = "flex";
+      if (logo && typeof logo === "string") {
+        if (logoImg) {
+          logoImg.src = logo;
+          G.style.display = "flex";
+          console.log("[UplinqChatWidget] Logo updated:", logo);
+        }
       } else {
         G.style.display = "none";
+        console.log("[UplinqChatWidget] Logo hidden");
       }
     }
   }
