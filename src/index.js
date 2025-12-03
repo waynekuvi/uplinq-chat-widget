@@ -2157,13 +2157,16 @@ function fe(t, l) {
   const g = h.attachShadow({ mode: "open" }), c = document.createElement("style");
   c.textContent = pe, g.appendChild(c);
   const x = document.createElement("template");
-  x.innerHTML = ge.trim(), g.appendChild(x.content.cloneNode(!0)), p.appendChild(h), ve(g, {
+  x.innerHTML = ge.trim(), g.appendChild(x.content.cloneNode(!0)), p.appendChild(h);
+  const optionsToPass = {
     webhookUrl: (l == null ? void 0 : l.webhookUrl) ?? he,
     inline: (l == null ? void 0 : l.inline) ?? !1,
     initialOpen: (l == null ? void 0 : l.initialOpen) ?? !1,
     position: (l == null ? void 0 : l.position) ?? "fixed",
     customization: (l == null ? void 0 : l.customization) ?? void 0
-  }), V.set(p, h);
+  };
+  console.log("[UplinqChatWidget] Mount function - options being passed to ve():", optionsToPass);
+  ve(g, optionsToPass), V.set(p, h);
 }
 function ue(t) {
   const l = typeof t == "string" ? document.querySelector(t) : t;
@@ -2172,9 +2175,18 @@ function ue(t) {
   p && (l.removeChild(p), V.delete(l));
 }
 function ve(t, l) {
+  console.log("[UplinqChatWidget] Initializing widget with options:", l);
   const p = me(), h = t.getElementById("chatButton"), g = t.getElementById("chatContainer"), c = t.getElementById("backBtn"), x = t.getElementById("homeView"), _ = t.getElementById("helpView"), j = t.getElementById("messagesView"), N = t.getElementById("chatMessages"), D = t.getElementById("inputArea"), O = t.getElementById("messageInput"), W = t.getElementById("sendBtn"), T = t.getElementById("unreadBadge"), Y = t.getElementById("bottomNav"), $ = t.getElementById("headerGreeting"), G = t.getElementById("headerLogo"), P = t.getElementById("headerAvatars"), R = t.getElementById("chatHomeHeader"), F = t.getElementById("chatSupportHeader"), y = t.getElementById("searchInput"), w = t.getElementById("helpSearchInput"), messagesListEl = t.getElementById("messagesList"), newConversationBtn = t.getElementById("newConversationBtn"), closeBtn = t.getElementById("headerCloseBtn"), attachmentBtn = t.getElementById("attachmentBtn"), emojiBtn = t.getElementById("emojiBtn"), gifBtn = t.getElementById("gifBtn"), voiceBtn = t.getElementById("voiceBtn"), attachmentInput = t.getElementById("attachmentInput"), emojiPicker = t.getElementById("emojiPicker"), gifPicker = t.getElementById("gifPicker"), gifSearchInput = t.getElementById("gifSearchInput"), gifResults = t.getElementById("gifResults"), gifCloseBtn = t.getElementById("gifCloseBtn"), voiceIndicator = t.getElementById("voiceIndicator"), chatScroll = t.getElementById("chatScroll");
+  console.log("[UplinqChatWidget] Element check - chatScroll:", chatScroll, "headerAvatars:", P, "headerLogo:", G);
   if (!h || !g || !x || !_ || !j || !N || !D || !O || !W || !T || !Y || !$ || !G || !P || !R || !F || !messagesListEl || !newConversationBtn || !closeBtn || !attachmentBtn || !emojiBtn || !gifBtn || !voiceBtn || !attachmentInput || !emojiPicker || !gifPicker || !gifSearchInput || !gifResults || !gifCloseBtn || !voiceIndicator || !chatScroll) {
     console.error("[UplinqChatWidget] Failed to initialize widget; required elements missing.");
+    console.error("[UplinqChatWidget] Missing elements:", {
+      chatButton: !h,
+      chatContainer: !g,
+      chatScroll: !chatScroll,
+      headerAvatars: !P,
+      headerLogo: !G
+    });
     return;
   }
   const isInline = (l == null ? void 0 : l.inline) === !0;
@@ -2184,48 +2196,94 @@ function ve(t, l) {
     widgetRoot.classList.add("inline");
   }
   const customization = (l == null ? void 0 : l.customization);
+  console.log("[UplinqChatWidget] Extracted customization:", customization);
+  console.log("[UplinqChatWidget] Full options object:", JSON.stringify(l, null, 2));
   const gradient = customization == null ? void 0 : customization.gradient;
   const avatars = customization == null ? void 0 : customization.avatars;
   const logo = customization == null ? void 0 : customization.logo;
+  console.log("[UplinqChatWidget] Extracted values - gradient:", gradient, "avatars:", avatars, "logo:", logo);
   if (customization) {
     console.log("[UplinqChatWidget] Customization received:", customization);
+  } else {
+    console.warn("[UplinqChatWidget] No customization object found in options");
   }
   if (gradient && chatScroll) {
+    console.log("[UplinqChatWidget] Applying gradient to chatScroll element");
     const { color1, color2, color3, color4 } = gradient;
+    console.log("[UplinqChatWidget] Gradient colors:", { color1, color2, color3, color4 });
     if (color1 && color2 && color3 && color4) {
       const gradientValue = `linear-gradient(180deg, ${color1}, ${color2}, ${color3} 32%, ${color4} 55%, #fff 72%, #fff, #fff)`;
+      console.log("[UplinqChatWidget] Setting gradient:", gradientValue);
       chatScroll.style.setProperty("background", gradientValue, "important");
-      console.log("[UplinqChatWidget] Gradient applied:", gradientValue);
+      console.log("[UplinqChatWidget] Gradient applied. Inline style:", chatScroll.style.background);
+      setTimeout(() => {
+        const inlineStyle = chatScroll.style.background;
+        console.log("[UplinqChatWidget] Gradient verification (after 100ms) - inline style:", inlineStyle);
+        if (!inlineStyle || !inlineStyle.includes(color1)) {
+          console.error("[UplinqChatWidget] WARNING: Gradient may not have applied correctly! Inline style:", inlineStyle);
+        } else {
+          console.log("[UplinqChatWidget] ✓ Gradient successfully applied!");
+        }
+      }, 100);
     } else {
       console.warn("[UplinqChatWidget] Gradient colors incomplete:", { color1, color2, color3, color4 });
     }
+  } else {
+    if (!gradient) {
+      console.warn("[UplinqChatWidget] No gradient object found");
+    }
+    if (!chatScroll) {
+      console.error("[UplinqChatWidget] chatScroll element not found!");
+    }
   }
   if (avatars && Array.isArray(avatars) && avatars.length > 0 && P) {
+    console.log("[UplinqChatWidget] Applying avatars:", avatars);
     P.innerHTML = "";
-    avatars.slice(0, 3).forEach((url) => {
+    avatars.slice(0, 3).forEach((url, index) => {
       if (url && typeof url === "string") {
         const img = document.createElement("img");
         img.src = url;
         img.alt = "Agent";
+        console.log("[UplinqChatWidget] Adding avatar", index + 1, ":", url);
         P.appendChild(img);
+      } else {
+        console.warn("[UplinqChatWidget] Invalid avatar URL at index", index, ":", url);
       }
     });
-    console.log("[UplinqChatWidget] Avatars updated:", avatars.slice(0, 3));
+    console.log("[UplinqChatWidget] Avatars updated. Total children:", P.children.length);
+  } else {
+    if (!avatars) {
+      console.log("[UplinqChatWidget] No avatars array provided");
+    } else if (!Array.isArray(avatars)) {
+      console.warn("[UplinqChatWidget] Avatars is not an array:", typeof avatars);
+    } else if (avatars.length === 0) {
+      console.log("[UplinqChatWidget] Avatars array is empty");
+    } else if (!P) {
+      console.error("[UplinqChatWidget] headerAvatars element not found!");
+    }
   }
   if (G) {
     const logoImg = G.querySelector("img");
+    console.log("[UplinqChatWidget] Logo element found:", G, "Logo img:", logoImg);
     if (logo !== void 0) {
       if (logo && typeof logo === "string") {
         if (logoImg) {
+          console.log("[UplinqChatWidget] Updating logo from", logoImg.src, "to", logo);
           logoImg.src = logo;
           G.style.display = "flex";
-          console.log("[UplinqChatWidget] Logo updated:", logo);
+          console.log("[UplinqChatWidget] Logo updated. New src:", logoImg.src);
+        } else {
+          console.error("[UplinqChatWidget] Logo img element not found in headerLogo!");
         }
       } else {
         G.style.display = "none";
-        console.log("[UplinqChatWidget] Logo hidden");
+        console.log("[UplinqChatWidget] Logo hidden (logo value:", logo, ")");
       }
+    } else {
+      console.log("[UplinqChatWidget] Logo not specified, using default");
     }
+  } else {
+    console.error("[UplinqChatWidget] headerLogo element not found!");
   }
   const k = x, z = _, B = j, r = N, L = D, E = $, M = G, I = P, S = R, H = F, u = O, ie = W, ae = Y;
   let b = !1;
